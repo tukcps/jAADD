@@ -1,0 +1,53 @@
+/*
+ * Gradle build file for jAADD.
+ * It uses a pre-compiled version of z3 under z3lib, not the maven that is outdated. 
+ * 
+ * - gradle build builds it. 
+ * - gradle clean cleans up. 
+ * - The (fat) jar file is in ./build/libs. 
+ * 
+ * User Manual available at https://docs.gradle.org/5.5/userguide/java_library_plugin.html
+ */
+
+plugins {
+    id 'java-library' // support for libraries: jaadd.jar
+    id 'idea'
+}
+
+
+repositories {
+    jcenter()
+    mavenCentral()
+}
+
+
+dependencies {
+
+    compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6'
+
+    // compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile group: 'org.json', name: 'json', version: '20180813'
+    compile 'com.google.code.gson:gson:2.2.4'
+
+
+    test.useJUnitPlatform()
+    testImplementation "org.junit.jupiter:junit-jupiter-params:5.5.1"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.5.1"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.5.1"
+}
+
+test {
+    // Use junit platform for unit tests
+    useJUnitPlatform()
+}
+
+
+//create a single Jar with all dependencies
+task fatJar(type: Jar) {
+	manifest { attributes 'Implementation-Title': 'jAADD library',  'Implementation-Version': '1.0'} 
+	baseName = project.name + '-all'
+    	from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    	with jar
+}
+
+

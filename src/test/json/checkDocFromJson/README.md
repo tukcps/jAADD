@@ -1,0 +1,1 @@
+This directory contains JSON - formatted inputs for the AADD test cases and regression tests.

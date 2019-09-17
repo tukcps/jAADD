@@ -1,0 +1,249 @@
+{
+  "1": {
+    "bounds": {
+      "lb": 5.0,
+      "ub": 5.0
+    },
+    "index": 0,
+    "leafValue": {
+      "central": 5.0,
+      "min": 5.0,
+      "max": 5.0,
+      "r": 0.0,
+      "type": "SCALAR",
+      "terms": {}
+    }
+  },
+  "2": {
+    "bounds": {
+      "lb": 5.6,
+      "ub": 6.0
+    },
+    "index": 0,
+    "leafValue": {
+      "central": 5.8,
+      "min": 5.6,
+      "max": 6.0,
+      "r": 0.0,
+      "type": "FINITE",
+      "terms": {
+        "2": 0.2
+      }
+    }
+  },
+  "3": {
+    "bounds": {
+      "lb": 6.2,
+      "ub": 7.0
+    },
+    "index": 0,
+    "leafValue": {
+      "central": 6.6,
+      "min": 6.199999999999999,
+      "max": 7.0,
+      "r": 0.0,
+      "type": "FINITE",
+      "terms": {
+        "2": 0.4
+      }
+    }
+  },
+  "4": {
+    "bounds": {
+      "lb": 6.799999999999999,
+      "ub": 8.0
+    },
+    "index": 0,
+    "leafValue": {
+      "central": 7.3999999999999995,
+      "min": 6.799999999999999,
+      "max": 8.0,
+      "r": 0.0,
+      "type": "FINITE",
+      "terms": {
+        "2": 0.6000000000000001
+      }
+    }
+  },
+  "5": {
+    "bounds": {
+      "lb": 7.4,
+      "ub": 9.0
+    },
+    "index": 0,
+    "leafValue": {
+      "central": 8.2,
+      "min": 7.3999999999999995,
+      "max": 9.0,
+      "r": 0.0,
+      "type": "FINITE",
+      "terms": {
+        "2": 0.8
+      }
+    }
+  },
+  "6": {
+    "bounds": {
+      "lb": 8.0,
+      "ub": 10.0
+    },
+    "index": 0,
+    "leafValue": {
+      "central": 9.0,
+      "min": 8.0,
+      "max": 10.0,
+      "r": 0.0,
+      "type": "FINITE",
+      "terms": {
+        "2": 1.0
+      }
+    }
+  },
+  "7": {
+    "bounds": {
+      "lb": 8.6,
+      "ub": 11.0
+    },
+    "T": {
+      "index": 0,
+      "leafValue": {
+        "central": 8.2,
+        "min": 6.999999999999999,
+        "max": 9.399999999999999,
+        "r": 0.0,
+        "type": "FINITE",
+        "terms": {
+          "2": 1.2
+        }
+      }
+    },
+    "F": {
+      "index": 0,
+      "leafValue": {
+        "central": 9.8,
+        "min": 8.600000000000001,
+        "max": 11.0,
+        "r": 0.0,
+        "type": "FINITE",
+        "terms": {
+          "2": 1.2
+        }
+      }
+    },
+    "index": 1
+  },
+  "8": {
+    "bounds": {
+      "lb": 8.8,
+      "ub": 10.833333333333334
+    },
+    "T": {
+      "index": 0,
+      "leafValue": {
+        "central": 7.3999999999999995,
+        "min": 6.0,
+        "max": 8.799999999999999,
+        "r": 0.0,
+        "type": "FINITE",
+        "terms": {
+          "2": 1.4
+        }
+      }
+    },
+    "F": {
+      "T": {
+        "index": 0,
+        "leafValue": {
+          "central": 9.0,
+          "min": 7.6,
+          "max": 10.4,
+          "r": 0.0,
+          "type": "FINITE",
+          "terms": {
+            "2": 1.4
+          }
+        }
+      },
+      "F": {
+        "index": 0,
+        "leafValue": {
+          "central": 10.600000000000001,
+          "min": 9.200000000000001,
+          "max": 12.000000000000002,
+          "r": 0.0,
+          "type": "FINITE",
+          "terms": {
+            "2": 1.4
+          }
+        }
+      },
+      "index": 2
+    },
+    "index": 1
+  },
+  "9": {
+    "bounds": {
+      "lb": 8.2,
+      "ub": 10.714285714285714
+    },
+    "T": {
+      "index": 0,
+      "leafValue": {
+        "central": 6.6,
+        "min": 5.0,
+        "max": 8.2,
+        "r": 0.0,
+        "type": "FINITE",
+        "terms": {
+          "2": 1.5999999999999999
+        }
+      }
+    },
+    "F": {
+      "T": {
+        "index": 0,
+        "leafValue": {
+          "central": 8.2,
+          "min": 6.6,
+          "max": 9.799999999999999,
+          "r": 0.0,
+          "type": "FINITE",
+          "terms": {
+            "2": 1.5999999999999999
+          }
+        }
+      },
+      "F": {
+        "T": {
+          "index": 0,
+          "leafValue": {
+            "central": 9.8,
+            "min": 8.200000000000001,
+            "max": 11.4,
+            "r": 0.0,
+            "type": "FINITE",
+            "terms": {
+              "2": 1.5999999999999999
+            }
+          }
+        },
+        "F": {
+          "index": 0,
+          "leafValue": {
+            "central": 11.400000000000002,
+            "min": 9.800000000000002,
+            "max": 13.000000000000002,
+            "r": 0.0,
+            "type": "FINITE",
+            "terms": {
+              "2": 1.5999999999999999
+            }
+          }
+        },
+        "index": 4
+      },
+      "index": 2
+    },
+    "index": 1
+  }
+}
