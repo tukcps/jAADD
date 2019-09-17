@@ -69,4 +69,19 @@ dependencies {
     compile files('libs/jAADD.jar')
 }
 ```
+In case of problems or other feedback contact:
 
+Carna Zivkovic  
+Chair of Design of Cyber-Physical Systems  
+TU Kaiserslautern  
+Postfach 3049   
+67653 Kaiserslautern  
+zivkovic@cs.uni-kl.de  
+https://cps.cs.uni-kl.de/mitarbeiter/carna-radojicic-msc/  
+
+Christoph Grimm  
+Chair of Design of Cyber-Physical Systems  
+TU Kaiserslautern  
+Postfach 3049  
+67653 Kaiserslautern  
+grimm@cs.uni-kl.de  
