@@ -11,6 +11,7 @@ import static jAADD.AADDMgr.ZERO;
 
 
 
+
 /**
  * The class AADD implements an Affine Arithmetic Decision Diagram (AADD).
  * An AADD is, in very brief, a decision diagram (class DD) whose leave nodes
@@ -63,36 +64,32 @@ public class AADD extends DD<AffineForm> implements Cloneable {
      public AADD(int index, AADD T, AADD F) {
          super(index, T, F);
 
-         if (T.isLeaf() && F.isLeaf()) {
-             if ((T.Value().type == Range.Type.NaN) && (F.Value().type == Range.Type.NaN)) {
-                 this.leafValue.setNaN();
-                 this.index= Integer.MAX_VALUE;
-                 this.T=this.F=null;
-             }
+         if (T.isLeaf() && T.Value().type == Range.Type.NaN) {
+            this.leafValue=F.leafValue.clone();
+            this.T = F.T();
+            this.F = F.F();
+            this.index = F.index;
+         }
+
+         if (F.isLeaf() && F.Value().type == Range.Type.NaN) {
+            this.leafValue=T.leafValue.clone();
+            this.T = T.T();
+            this.F = T.F();
+            this.index=T.index;
          }
 
          if (T.isLeaf() && F.isLeaf() && T.Value().isSimilar(F.Value(), joinTh)) {
-             leafValue = T.Value().join(F.Value());
-             this.index = Integer.MAX_VALUE;
-             this.T = this.F = null;
+            leafValue = T.Value().join(F.Value());
+            this.index = Integer.MAX_VALUE;
+            this.T = this.F = null;
          }
      }
 
 
      /**
-      * Creates an internal node and a new condition.
-      * @param cond A condition that is an affine form with at least one noise symbol.
-      * @param T Child for true, may not be null.
-      * @param F Child for false, may not be null.
-      */
-     // public AADD(AffineForm cond, AADD T, AADD F) {
-     //    super(cond, T, F);
-     // }
-
-
-     /**
       *  Clone method. Copies the tree structure, but not conditions.
       *  The leaves are not copied for BDD, where ONE and ZERO are merged.
+      *  Note that the clone method does also a reduction where possible. 
       */
      @Override
      public AADD clone() {
@@ -350,14 +347,18 @@ public class AADD extends DD<AffineForm> implements Cloneable {
 
 
     /**
-     * This method computes the minimum and maximum value of an AADD considering <ul>
+     * This method computes the Range of an AADD considering <ul>
      * <li> the conditions as linear constraints.
      * <li> the noise symbol's limitations to -1 to 1.
      * <li> The affine forms at the leaves as objective functions to be min/max. </ul>
      */
-    public Range getMinMax() {
-        Set<Range> bounds=getAllBounds();
-        assert bounds.size()!=0;  // bounds should contain at least one value
+    public Range getRange() {
+
+        Set<Range> bounds=new HashSet<>();
+        int[] indexes=new int[height()];
+        String[] signs=new String[height()];
+        computeBounds(indexes, signs, 0, bounds);
+        assert bounds.size() != 0;
 
         Range res = new Range(Range.Type.NaN);
         res.type = Range.Type.FINITE;
@@ -370,27 +371,12 @@ public class AADD extends DD<AffineForm> implements Cloneable {
         return res;
     }
 
-    /**
-     * This method computes minimum and maximum values of affine forms at the leaves
-     * - the conditions as linear constraints.
-     * - the noise symbol's limitations to -1 to 1.
-     * - The affine forms at the leaves as objective functions to be min/max.
-     */
-    public Set<Range> getAllBounds() {
-        Set<Range> bounds=new HashSet<>();
-        int[] indexes=new int[height()];
-        String[] signs=new String[height()];
-        computeBounds(indexes, signs, 0, bounds);
-        assert bounds.size() != 0;  // bounds should contain at least one value
-        return bounds;
-    }
-
 
     /**
      * Collects bounds of all leaves.
-     * Calls callLPSolver to compute bounds for each leaf.
-     *  when node is internal, it collects its condition.
-     *  The method is called by getAllBounds and getMinMax.
+     * When the AADD is an internal node, it collects condition Xp,v on path to leave v.
+     * For each leaf, it calls callLPSolver to compute bounds.
+     * The method is called by getAllBounds and getMinMax.
      */
     private void computeBounds(int[] indexes, String[] operators, int len, Set<Range> bounds) {
 
@@ -420,7 +406,7 @@ public class AADD extends DD<AffineForm> implements Cloneable {
      * - Constraints, defined by the conditions in the internal nodes on the path from root to leaf.
      *
      * @param indexes the indexes from the path from root to the respective leave; set of conditions
-     * @param operators the operators.
+     * @param operators the operators on the path to the respective leave.
      * @param len the sizes of the arrays.
      * @return
      */
@@ -450,7 +436,7 @@ public class AADD extends DD<AffineForm> implements Cloneable {
             partial_terms[i] = 0.0;
         }
 
-        // constraints from conditions, incl. r.
+        // constraints from conditions of the internal nodes, incl. r.
         for (int i=0; i < len; i++) {
             AffineForm condition = AADDMgr.getCond(indexes[i]);
 
@@ -482,6 +468,9 @@ public class AADD extends DD<AffineForm> implements Cloneable {
 
         // System.out.print  ("       Condition's indexes: " );
         // for(int i=0; i<len; i++) System.out.print(""+indexes[i]+", ");System.out.println("");
+
+        //Print the unequationSystem for the LPsolver in the file "unequationSystemOnDemand"
+        if (AADDMgr.debugFlagLPsolvePrint) AADDMgr.printUnequationSystem("unequationSystemOnDemand",constraints,partial_terms,Value());
 
         Range result = new Range(Range.Type.FINITE);
         PointValuePair solution;
@@ -515,6 +504,10 @@ public class AADD extends DD<AffineForm> implements Cloneable {
             // throw new RuntimeException(("AADD-Error: No feasible solution."));
         }
         catch (UnboundedSolutionException e) {
+            //writting the unequation system the UnboundedSolution Instances in a textfile
+            //
+            AADDMgr.printUnequationSystem("unequationSystemOfUnboundedError",constraints,partial_terms,Value());
+
             Value().diagnostics_on = true;
             System.out.println("");
             System.out.println("ERROR: Unbounded solution of LP problem. ");
@@ -534,7 +527,6 @@ public class AADD extends DD<AffineForm> implements Cloneable {
         }
         return result;
     }
-
 
     /**
      * Creates a new BDD level, depending on the satisfiability of a comparison.

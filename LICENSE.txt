@@ -1,5 +1,5 @@
 
-Copyright (c) TU Kaiserslautern
+Copyright (2019) TU Kaiserslautern
 All rights reserved. 
 MIT License
 

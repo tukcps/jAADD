@@ -2,12 +2,17 @@ package jAADD;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
+//Write in file for the unequation system
+import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.FileReader;
+import java.io.IOException;
+import java.util.Collection;
+
 import java.util.HashMap;
 import java.util.Map;
 import com.google.gson.reflect.TypeToken;
+import org.apache.commons.math3.optim.linear.LinearConstraint;
 
 
 import static java.lang.System.out;
@@ -33,6 +38,8 @@ public class AADDMgr {
     public static BDD ZERO = new BDD(false); // Leave of value ZERO
     public static BDD BOOL = new BDD(true);
     public static final AADD REAL = new AADD(AffineForm.INFINITE);
+    // flag that enables an print of unequation for the LPsolver
+    public static boolean debugFlagLPsolvePrint;
 
     protected static int topIndex = 0;  // last index used for growing index.
     protected static int btmIndex = 0;  // last index used for falling index.
@@ -172,6 +179,52 @@ public class AADDMgr {
         innermap.put(key, aaf);
     }
 
+    /**
+     * This is an debugge function, which should prints the unequation system
+     * that is passed to the LPsolver.
+     * It prints in the unequations of constrains
+     * and interprets the array partial_terms as objective function
+     * and prints it in a new text-file.
+     * @param fileName Name of the new text-file
+     * @param constraints contains the linear unequations
+     * @param partial_terms should contain the objective function
+     */
+    public static void printUnequationSystem(String fileName, Collection<LinearConstraint> constraints, double[] partial_terms, AffineForm value){
+        try (FileWriter writer = new FileWriter(fileName+".txt");
+             BufferedWriter bw = new BufferedWriter(writer)) {
+
+            bw.write("Unequation system");
+            bw.newLine();
+
+            int eqCount = 1;
+            for (LinearConstraint con:constraints){
+                StringBuilder line=new StringBuilder("("+eqCount+")");
+                double [] coefficients =con.getCoefficients().toArray();
+                for (int i=0; i<coefficients.length;i++){
+                    String connect =i>0?"+":"";
+                    line.append(connect+" "+coefficients[i]+" * e"+(i+1));
+                }
+                String sign =con.getRelationship().toString();
+                line.append(" "+sign+" "+con.getValue());
+                bw.write(line.toString());
+                bw.newLine();
+                eqCount++;
+            }
+            bw.write("objective function");
+            bw.newLine();
+            StringBuilder line=new StringBuilder("");
+            for (int i=0;i<partial_terms.length;i++){
+                String connect =i>0?"+":"";
+                line.append(connect+" "+partial_terms[i]+" * e"+(i+1));
+            }
+            bw.write("maxizime "+line.toString()+" + "+(- value.getCentral()) +" + "+value.getR());
+            bw.newLine();
+            bw.write("minizime "+line.toString()+" + "+(-value.getCentral()) +" - "+value.getR());
+            bw.close();
+        } catch (IOException ioE) {
+            System.err.format("IOException: %s%n", ioE);
+        }
+    }
 
     static public void writeToJson()
     {

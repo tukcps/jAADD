@@ -105,7 +105,7 @@ public class AffineForm extends Range {
         } else if (Double.compare(r, 0.0) < 0)
             throw new RuntimeException("Trying to create affine form with negative noise: " + r);
 
-        xi = new HashMap<Integer, Double>(ts);
+        xi = new HashMap<>(ts);
         for (Double val : xi.values()) {
             if (Double.isInfinite(val)) {
                 setInfinity();
@@ -655,7 +655,7 @@ public class AffineForm extends Range {
     @Override
     public String toString() {
         String af = super.toString();
-        if (diagnostics_on ) {
+       // if (diagnostics_on ) {
             if (!isTrap()) {
                 af += " = ";
                 af += String.format("%.2f", getCentral()) + " + ";
@@ -664,7 +664,7 @@ public class AffineForm extends Range {
                 }
                 af += "[+/-" +String.format("%.3f",getR()) +"]";
             }
-        }
+      //  }
         return af;
     }
 }

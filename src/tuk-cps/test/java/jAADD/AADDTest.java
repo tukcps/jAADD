@@ -44,7 +44,7 @@ class AADDTest {
         AADD e = c2.ITE(a, b);
 
         AADD f = d.add(e);
-        Range minmax=f.getMinMax();
+        Range minmax=f.getRange();
         System.out.println("F: "+f);
     }
 
@@ -297,7 +297,7 @@ class AADDTest {
         System.out.println("aadd1: "+add1);
 
        // Compute Total Lower and Upper Bounds of add1
-       Range r =add1.getMinMax();
+       Range r =add1.getRange();
        System.out.println("BOUNDS of AAD1 COMPUTED: [LB: "+r.getMin()+", UB: "+r.getMax()+"]");
 
         // t <=4.0
@@ -393,9 +393,9 @@ class AADDTest {
         // for discrete-time approximation of a time step
         AADD change;
 
-        for (Double time = 0.0; time < 100; time = time + 1.0) {     // Sampled over 25 sec.
+        for (Double time = 0.0; time < 10; time = time + 1.0) {     // Sampled over 25 sec.
 
-            Range wl = level.getMinMax();                // Solves LP to compute accurate bounds of AADD.
+            Range wl = level.getRange();                // Solves LP to compute accurate bounds of AADD.
             AADDMgr.addAADDSample("level", level, time); // Writes level into stream of samples of AADD.
 
             // Some tracing.
@@ -405,7 +405,7 @@ class AADDTest {
             System.out.println("water level is: "+wl);
 
             // Testing some invariants of the model.
-            assertTrue(lb > 0.1); // Invariant: no empty tank.
+            assertTrue(lb > 1.0); // Invariant: no empty tank.
             assertTrue(ub < 11.9);// Invariant: no overflow of tank.
 
             BDD too_high = level.Gt(new AADD(10.0));      // Checks for upper threshold.

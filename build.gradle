@@ -9,11 +9,16 @@
  * User Manual available at https://docs.gradle.org/5.5/userguide/java_library_plugin.html
  */
 
+// building
 plugins {
     id 'java-library' // support for libraries: jaadd.jar
     id 'idea'
+    
+    
+    
 }
 
+apply plugin: 'java'
 
 repositories {
     jcenter()
@@ -50,4 +55,109 @@ task fatJar(type: Jar) {
     	with jar
 }
 
+// deploying
 
+apply plugin: 'signing'
+
+signing {
+    sign configurations.archives
+
+}
+
+// Deploying
+
+apply plugin: 'maven'
+
+// Add Javadoc JAR and AADD sources JAR to artifact
+task javadocJar(type: Jar){
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier= 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+// Configure group ID, artifact ID and version
+
+group = "com.github.tuk-cps"
+archivesBaseName="aadd"
+version = "1.0.0"
+
+// and now Build, sign and upload to OSSRH
+
+uploadArchives {
+    repositories {
+
+        mavenDeployer {
+
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+
+            // Destination
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            // Add required metadata to POM
+
+            pom.project {
+
+                name 'Affine Arithmetic Decision Diagrams (AADD)'
+                packaging jar
+                description 'This project implements Affine Arithmetic Decision Diagrams (AADD) in Java. AADD permit in particular the symbolic execution of Java codes.'
+                url 'https://github.com/TUK-CPS/jAADD'
+
+                scm {
+
+                    connection 'scm:git:git://github.com/TUK-CPS/jAADD.git'
+                    developerConnection 'scm:git:ssh://github.com/TUK-CPS/jAADD.git'
+                    url 'https://github.com/TUK-CPS/jAADD/tree/master'
+
+                }
+
+               licenses {
+                    license {
+                        name 'The MIT License'
+                        url 'https://opensource.org/licenses/MIT'
+                    }
+                }
+
+                developers {
+
+                    developer {
+
+                        id 'grimm'
+                        name 'Christoph Grimm'
+                        email 'grimm@cs.uni-kl.de'
+                        organization 'TU Kaiserslautern, Design of CPS systems'
+                        organizationUrl 'https://cps.cs.uni-kl.de/cps/'
+
+                    }
+                    developer {
+
+                        id 'zivkovic'
+                        name 'Carna Zivkovic'
+                        email 'zivkovic@cs.uni-kl.de'
+                        organization 'TU Kaiserslautern, Design of CPS systems'
+                        organizationUrl 'https://cps.cs.uni-kl.de/cps/'
+
+                    }
+                }
+
+            }
+
+
+        }
+
+    }
+
+}
