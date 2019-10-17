@@ -87,7 +87,7 @@ artifacts {
 
 group = "com.github.tuk-cps"
 archivesBaseName="aadd"
-version = "1.0."
+version = "1.0.0"
 
 // and now Build, sign and upload to OSSRH
 
