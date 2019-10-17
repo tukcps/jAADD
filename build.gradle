@@ -13,9 +13,9 @@
 plugins {
     id 'java-library' // support for libraries: jaadd.jar
     id 'idea'
-    
-    
-    
+
+
+
 }
 
 apply plugin: 'java'
@@ -49,7 +49,7 @@ test {
 
 //create a single Jar with all dependencies
 task fatJar(type: Jar) {
-	manifest { attributes 'Implementation-Title': 'jAADD library',  'Implementation-Version': '1.0'} 
+	manifest { attributes 'Implementation-Title': 'jAADD library',  'Implementation-Version': '1.0.0'}
 	baseName = project.name + '-all'
     	from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     	with jar
@@ -87,7 +87,7 @@ artifacts {
 
 group = "com.github.tuk-cps"
 archivesBaseName="aadd"
-version = "1.0.0"
+version = "1.0."
 
 // and now Build, sign and upload to OSSRH
 
@@ -96,6 +96,7 @@ uploadArchives {
 
         mavenDeployer {
 
+            // sign POM 
             beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
 
@@ -112,7 +113,7 @@ uploadArchives {
             pom.project {
 
                 name 'Affine Arithmetic Decision Diagrams (AADD)'
-                packaging jar
+                packaging 'jar'
                 description 'This project implements Affine Arithmetic Decision Diagrams (AADD) in Java. AADD permit in particular the symbolic execution of Java codes.'
                 url 'https://github.com/TUK-CPS/jAADD'
 
