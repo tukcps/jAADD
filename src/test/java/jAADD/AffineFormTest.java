@@ -91,9 +91,9 @@ public class AffineFormTest {
         AffineForm sum1 = af3.add(af1);
         AffineForm sum2 = af1.add(af3);
 
-        assertEquals(AffineForm.Type.INFINITE, af3.getType());
-        assertEquals(AffineForm.Type.INFINITE, sum1.getType());
-        assertEquals(AffineForm.Type.INFINITE, sum2.getType());
+        assertEquals(Range.Trap.INFINITE, af3.getTrap());
+        assertEquals(Range.Trap.INFINITE, sum1.getTrap());
+        assertEquals(Range.Trap.INFINITE, sum2.getTrap());
         assertEquals(sum1, sum2);
     }
 
@@ -103,9 +103,9 @@ public class AffineFormTest {
         AffineForm sum1 = af3.add(af1);
         AffineForm sum2 = af1.add(af3);
 
-        assertEquals(AffineForm.Type.NaN, af3.getType());
-        assertEquals(AffineForm.Type.NaN, sum1.getType());
-        assertEquals(AffineForm.Type.NaN, sum2.getType());
+        assertEquals(Range.Trap.NaN, af3.getTrap());
+        assertEquals(Range.Trap.NaN, sum1.getTrap());
+        assertEquals(Range.Trap.NaN, sum2.getTrap());
         assertEquals(sum1, sum2);
     }
 /*
@@ -163,7 +163,7 @@ public class AffineFormTest {
         AffineForm af3 = new AffineForm(10.0, terms2, 0.0);
         AffineForm mult = lgr.mult(af3);
 
-        assertEquals(AffineForm.Type.FINITE, mult.getType());
+        assertEquals(Range.Trap.FINITE, mult.getTrap());
         assertEquals(100.0, mult.getCentral(), PRECISION);
         assertEquals(71.0, mult.getMin(), PRECISION);
         assertEquals(129.0, mult.getMax(), PRECISION);
@@ -246,12 +246,12 @@ public class AffineFormTest {
         // Around zero
         AffineForm af3 = new AffineForm(-2.0, 2.0, -1);
         AffineForm inv = af3.inv();
-        assertEquals(AffineForm.Type.INFINITE, inv.getType());
+        assertEquals(Range.Trap.INFINITE, inv.getTrap());
 
         // Infinity should be preserved
         AffineForm inf = new AffineForm(Double.POSITIVE_INFINITY);
         AffineForm inv2 = inf.inv();
-        assertEquals(AffineForm.Type.INFINITE, inv2.getType());
+        assertEquals(Range.Trap.INFINITE, inv2.getTrap());
 
         // Regular
         AffineForm inv3 = af1.inv();
@@ -267,7 +267,7 @@ public class AffineFormTest {
         // Div by zero should return infinity
         AffineForm zero = new AffineForm(0.0);
         AffineForm div = af1.div(zero);
-        assertEquals(AffineForm.Type.INFINITE, div.getType());
+        assertEquals(Range.Trap.INFINITE, div.getTrap());
 
         // Regular division is tested by inversion + multiplication
     }
@@ -428,7 +428,7 @@ public class AffineFormTest {
         HashMap<Integer, Double> terms = new HashMap<Integer, Double>();
         terms.put(1, Double.POSITIVE_INFINITY);
         AffineForm af3 = new AffineForm(0.0, terms, 0.000001);
-        assertEquals(AffineForm.Type.INFINITE, af3.getType());
+        assertEquals(Range.Trap.INFINITE, af3.getTrap());
     }
 
 

@@ -2,9 +2,8 @@ package jAADD;
 
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static jAADD.AADDMgr.ONE;
-import static jAADD.AADDMgr.ZERO;
-import static jAADD.AADDMgr.BOOL;
+import static jAADD.BDD.ONE;
+import static jAADD.BDD.ZERO;
 
 class BDDTest {
 
@@ -34,10 +33,10 @@ class BDDTest {
     public void testBDDexception() {
         // there shall be an assertion error if we access an index
         // that is not referring to a condition
-        AADDMgr.resetConditions();
+        Conditions.reset();
         Throwable exception = assertThrows(java.lang.AssertionError.class,
                 () -> {
-                    BDD a = new BDD(1, ONE, ZERO);
+                    BDD a = new BDD(100, ONE, ZERO);
                 });
     }
 
@@ -45,19 +44,19 @@ class BDDTest {
     @Test
     public void testBDDcond()
     {
-        AADDMgr.resetConditions();
-        BDD dummy = BOOL;
+        Conditions.reset();
+        BDD dummy = BDD.BOOL;
 
         // int i = AADDMgr.lastIndex;
 
         AffineForm cond = new AffineForm(1.0, 2.0, 1);
         // System.out.println("i:"+BDD.lastIndex);
-        BDD a = new BDD(AADDMgr.newTopIndex(cond), ONE, ZERO);
+        BDD a = new BDD(Conditions.newIndex(cond), ONE, ZERO);
         // System.out.println("i:"+BDD.lastIndex);
-        BDD b = new BDD(AADDMgr.newBtmIndex(cond), ZERO, ONE);
+        BDD b = new BDD(Conditions.newBtmIndex(cond), ZERO, ONE);
 
         cond  = new AffineForm(2,3, -1);
-        BDD c = new BDD(AADDMgr.newBtmIndex(cond), a, b);
+        BDD c = new BDD(Conditions.newBtmIndex(cond), a, b);
 
         // System.out.println("i: "+i+"a:"+a + "  b: "+ b + "   C:  " + c);
         assertEquals(2, c.height());
@@ -69,7 +68,7 @@ class BDDTest {
 
     @Test
     void complement() {
-        int cond = AADDMgr.newBtmIndex(new AffineForm(1.0, 2.0, 1));
+        int cond = Conditions.newBtmIndex(new AffineForm(1.0, 2.0, 1));
         BDD a = new BDD(cond, ONE, ZERO);
         BDD b = new BDD(cond, ZERO, ONE);
         BDD c = a.negate();
@@ -79,7 +78,7 @@ class BDDTest {
 
     @Test
     void and() {
-        int cond = AADDMgr.newBtmIndex(new AffineForm(1.0, 2.0, 1));
+        int cond = Conditions.newBtmIndex(new AffineForm(1.0, 2.0, 1));
         BDD a = new BDD(cond, ONE, ZERO);
         BDD b = new BDD(cond, ZERO, ONE);
         BDD expected = ZERO; // via reduction of BDD.
@@ -98,7 +97,7 @@ class BDDTest {
 
     @Test
     void ITE() {
-        int cond = AADDMgr.newBtmIndex(new AffineForm(1.0, 2.0, 1));
+        int cond = Conditions.newBtmIndex(new AffineForm(1.0, 2.0, 1));
         BDD a = new BDD(cond, ONE, ZERO);
         BDD b = new BDD(cond, ZERO, ONE);
         BDD r = b.ITE(ONE, b);
