@@ -28,11 +28,11 @@ public class Range implements Cloneable {
      *   <li>INFINITE is an overflow.
      *   <li>NaN is Not-A-Number.</ul>
      */
-    public enum Type {
+    public enum Trap {
         SCALAR, FINITE, INFINITE, NaN
     }
 
-    Type type;
+    Trap trap;
 
     /**
      * Creates a range from min to max and checks whether the ranges is a NaN, Infinite, Scalar, or
@@ -44,16 +44,16 @@ public class Range implements Cloneable {
         if (Double.isNaN(max) || Double.isNaN(min)) setNaN();
         else if (Double.compare(min, max) > 0) setNaN();
         else if (Double.isInfinite(min) || Double.isInfinite(max)) setInfinity();
-        else if (Double.compare(min, max) == 0) this.type = Type.SCALAR;
+        else if (Double.compare(min, max) == 0) this.trap = Trap.SCALAR;
         else {
-            this.type = Type.FINITE;
+            this.trap = Trap.FINITE;
             this.min = min;
             this.max = max;
         }
     }
 
     Range(Range other) {
-        this.type = other.type;
+        this.trap = other.trap;
         this.min  = other.min;
         this.max  = other.max;
     }
@@ -64,16 +64,16 @@ public class Range implements Cloneable {
         else {
             this.min = c;
             this.max = c;
-            this.type = Type.SCALAR;
+            this.trap = Trap.SCALAR;
         }
     }
 
 
-    Range(Type kind) {
-        if (kind == Type.NaN) setNaN();
-        else if (kind == Type.INFINITE) setInfinity();
+    Range(Trap kind) {
+        if (kind == Trap.NaN) setNaN();
+        else if (kind == Trap.INFINITE) setInfinity();
         else {
-            this.type = Type.FINITE;
+            this.trap = Trap.FINITE;
             min=Double.NEGATIVE_INFINITY;
             max=Double.POSITIVE_INFINITY;
         }
@@ -81,39 +81,49 @@ public class Range implements Cloneable {
 
 
     public void setInfinity() {
-        type = Type.INFINITE;
+        trap = Trap.INFINITE;
         min = Double.NEGATIVE_INFINITY;
         max = Double.POSITIVE_INFINITY;
     }
 
     public void setNaN() {
-        type = Type.NaN;
+        trap = Trap.NaN;
         min = Double.POSITIVE_INFINITY;
         max = Double.NEGATIVE_INFINITY;
     }
 
-    public Range handleTrap(Range other) {
-        if (this.type == Type.NaN || other.type == Type.NaN) return new Range(Type.NaN);
-        if (this.type == Type.INFINITE || other.type == Type.INFINITE) return new Range(Type.INFINITE);
-        if ( (this.type == Type.SCALAR) && (other.type == Type.SCALAR)) return new Range(Type.SCALAR);
-        return new Range(Type.FINITE);
+    /**
+     * The method returns a new range of the type defined by the trap-type of this and other.
+     * It is used to check traps in binary operations.
+     * The calling method must correctly set the range's values.
+     * @param other The other parameter of a binary operation.
+     * @return A range with the type set appropriately.
+     */
+    Range handleTrap(Range other) {
+        if (this.trap == Trap.NaN || other.trap == Trap.NaN) return new Range(Trap.NaN);
+        if (this.trap == Trap.INFINITE || other.trap == Trap.INFINITE) return new Range(Trap.INFINITE);
+        if ( (this.trap == Trap.SCALAR) && (other.trap == Trap.SCALAR)) return new Range(Trap.SCALAR);
+        return new Range(Trap.FINITE);
     }
 
+
+    /**
+     * The method checks if one of the parameters of a binary operations is a trap.
+     * If so, it returns true.
+     * @param other The 2nd parameter of a binary operation.
+     * @return True, if one of the parameters is NaN or Infinite.
+     */
     public boolean isTrap(Range other) {
-        if (this.type == Type.NaN || other.type == Type.NaN
-                || this.type == Type.INFINITE || other.type == Type.INFINITE) return true;
-        else
-            return false;
+        return this.trap == Trap.NaN || other.trap == Trap.NaN
+                || this.trap == Trap.INFINITE || other.trap == Trap.INFINITE;
     }
 
     public boolean isTrap(double other) {
-        if (this.isTrap() || Double.isNaN(other) || Double.isInfinite(other)) return true;
-        else return false;
+        return this.isTrap() || Double.isNaN(other) || Double.isInfinite(other);
     }
 
     public boolean isTrap() {
-        if (this.type == Type.NaN || this.type == type.INFINITE) return true;
-        else return false;
+        return this.trap == Trap.NaN || this.trap == Trap.INFINITE;
     }
 
     public double getMin() {
@@ -124,8 +134,7 @@ public class Range implements Cloneable {
         return max;
     }
 
-
-    // Some operations.
+    // Some operations on ranges.
     Range add(Range other) { return new Range(min+other.min, max+other.max); }
     Range sub(Range other) { return new Range(min-other.min, max-other.max); }
     Range mul(Range other) {
@@ -142,20 +151,20 @@ public class Range implements Cloneable {
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;
         Range other = (Range) obj;
-        return other.min == min && other.max == max && other.type == type;
+        return other.min == min && other.max == max && other.trap == trap;
     }
 
     @Override
     public String toString() {
-        if (type == Type.NaN) return "NaN";
-        else if (type == Type.INFINITE) return "INF";
-        else if (type == Type.FINITE) return "["+ String.format("%.2f", min) + "; " + String.format("%.2f", max) + "]";
+        if (trap == Trap.NaN) return "NaN";
+        else if (trap == Trap.INFINITE) return "INF";
+        else if (trap == Trap.FINITE) return "["+ String.format("%.2f", min) + "; " + String.format("%.2f", max) + "]";
         else return ""+getMin();
     }
 
 
-    public Type getType() {
-        return type;
+    public Trap getTrap() {
+        return trap;
     }
 
     public boolean isStrictlyPositive() {

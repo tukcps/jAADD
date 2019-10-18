@@ -28,7 +28,7 @@ public class ExprTree {
     public DD           getResult()                 { return result; }
     public void         setResult(DD v)             { result = v; }
     public String       getId()                     { return id; }
-    public void         setId(String id)            { this.id = new String(id); }
+    public void         setId(String id)            { this.id = id; }
     public static SymbolTable getSymTab()           { return symTab; }
     public static void  setSymTab(SymbolTable s)    { symTab = s; }
 

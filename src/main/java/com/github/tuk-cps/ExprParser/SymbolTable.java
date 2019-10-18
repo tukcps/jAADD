@@ -1,18 +1,14 @@
 package ExprParser;
 
-import jAADD.AADD;
-import jAADD.AffineForm;
-import static jAADD.AADDMgr.BOOL;
-import jAADD.DD;
-
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Stack;
 
-import static jAADD.AADDMgr.ONE;
-import static jAADD.AADDMgr.ZERO;
+import jAADD.BDD;
+import jAADD.AADD;
+import jAADD.AffineForm;
+import jAADD.DD;
 
 /**
  * A simple symbol table:
@@ -29,11 +25,11 @@ class SymbolTable {
         globals = new HashMap<>();
         scopes = new Stack<>();
         defVar("real", new AADD(AffineForm.INFINITE));
-        defVar("bool", BOOL);
+        defVar("bool", BDD.BOOL);
         defVar("pi", new AADD(Math.PI));
         defVar("e", new AADD(Math.E));
-        defVar("true", new ExprTree(ONE));
-        defVar("false", new ExprTree(ZERO));
+        defVar("true", new ExprTree(BDD.ONE));
+        defVar("false", new ExprTree(BDD.ZERO));
         defFunc("not", new ExprTreeNot());
         defFunc("ite", new ExprTreeITE());
         defFunc("range", new ExprTreeRange());

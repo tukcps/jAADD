@@ -1,11 +1,7 @@
 package ExprParser;
 
-import jAADD.AADD;
 import jAADD.BDD;
-import static jAADD.AADDMgr.BOOL;
-import static jAADD.AADDMgr.ONE;
-import static jAADD.AADDMgr.ZERO;
-import static jAADD.AADDMgr.REAL;
+import static jAADD.AADD.REAL;
 
 /**
  * The ITE function.
@@ -13,7 +9,7 @@ import static jAADD.AADDMgr.REAL;
 class ExprTreeITE extends ExprTreeFunction {
 
     ExprTreeITE()  throws ExprError {
-        super(REAL, "ite", new ExprTree("i", BOOL), new ExprTree("t", REAL), new ExprTree("e", REAL));
+        super(REAL, "ite", new ExprTree("i", BDD.BOOL), new ExprTree("t", REAL), new ExprTree("e", REAL));
     }
 
     // ITE function
@@ -33,8 +29,8 @@ class ExprTreeITE extends ExprTreeFunction {
 
         getParam(0).evalExpr(); // Evaluate i
         BDD i=getBDDParam(0);   //
-        if (i == ONE ) { getParam(1).evalExpr();}
-        else if (i == ZERO) { getParam(2).evalExpr(); }
+        if (i == BDD.ONE ) { getParam(1).evalExpr();}
+        else if (i == BDD.ZERO) { getParam(2).evalExpr(); }
         else {
             getParam(1).evalExpr();
             getParam(2).evalExpr();

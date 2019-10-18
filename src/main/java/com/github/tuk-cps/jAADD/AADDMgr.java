@@ -2,7 +2,6 @@ package jAADD;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-//Write in file for the unequation system
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.FileReader;
@@ -16,7 +15,6 @@ import org.apache.commons.math3.optim.linear.LinearConstraint;
 
 
 import static java.lang.System.out;
-import static java.lang.System.err;
 
 
 /**
@@ -24,54 +22,21 @@ import static java.lang.System.err;
  * It allows to add documentation for noise symbols and for the index conditions of AADD and BDD.
  * Furthermore, it allows to write traces, tagged by integer to files.
  *
- * The class IOManager keeps the documentation of
+ * The class AADDmanager keeps the documentation of
  * - the noise symbols of Affine Forms. Each noise symbol is documented by some strings, i.e. Name, Unit, ...
  * - the conditions of the AADD. Here, each index refers to a condition of the kind {@code AAF > 0}.
  * Furthermore, it implements the Json import/export.
  */
 public class AADDMgr {
 
-    /**
-     * ONE and ZERO shall be used as the only leaf nodes.
-     */
-    public static BDD ONE = new BDD( true);  // Leave of value ONE
-    public static BDD ZERO = new BDD(false); // Leave of value ZERO
-    public static BDD BOOL = new BDD(true);
-    public static final AADD REAL = new AADD(AffineForm.INFINITE);
-    // flag that enables an print of unequation for the LPsolver
+    // flag that enables an print of inequation for the LPsolver
     public static boolean debugFlagLPsolvePrint;
 
-    protected static int topIndex = 0;  // last index used for growing index.
-    protected static int btmIndex = 0;  // last index used for falling index.
-    protected static HashMap<Integer,AffineForm> cond = new HashMap<>();
-
-    public static AffineForm getCond(int i) {
-        assert btmIndex <= i;
-        assert i <= topIndex : "index out of range accessed: "+i;
-        assert i != Integer.MIN_VALUE;
-        return cond.get(i);
-    }
-
-    public static int newTopIndex(AffineForm c) {
-        cond.put(++topIndex, c.clone());
-        return topIndex;
-    }
-
-    public static int newBtmIndex(AffineForm c) {
-        cond.put(--btmIndex, c.clone());
-        return btmIndex;
-    }
-
-    /**
-     * The conditions are, for each index, each of the form
-     * {@code AffineForm >= 0, with -1 <= ei <= 1}
-     * The are saved in a hashmap and shared among all AADD/BDD.
-     */
 
     // A stream of BDD, tagged with a double that models time.
     public static class BDDStream extends HashMap<Double, BDD> {}
 
-    // A stream of AADD, tagged with a doulbe that models time.
+    // A stream of AADD, tagged with a double that models time.
     // public class AADDStream extends HashMap<Double, AADD> {};
 
     // A stream of Affine Forms, time-tagged with an integer.
@@ -180,16 +145,16 @@ public class AADDMgr {
     }
 
     /**
-     * This is an debugge function, which should prints the unequation system
+     * This is a debug function, which should prints the inequation system
      * that is passed to the LPsolver.
-     * It prints in the unequations of constrains
+     * It prints in the inequations of constrains
      * and interprets the array partial_terms as objective function
      * and prints it in a new text-file.
      * @param fileName Name of the new text-file
-     * @param constraints contains the linear unequations
+     * @param constraints contains the linear inequations
      * @param partial_terms should contain the objective function
      */
-    public static void printUnequationSystem(String fileName, Collection<LinearConstraint> constraints, double[] partial_terms, AffineForm value){
+    public static void printInequationSystem(String fileName, Collection<LinearConstraint> constraints, double[] partial_terms, AffineForm value){
         try (FileWriter writer = new FileWriter(fileName+".txt");
              BufferedWriter bw = new BufferedWriter(writer)) {
 
@@ -346,11 +311,6 @@ public class AADDMgr {
         }
     }
 
-    public static void resetConditions() {
-        topIndex = 0;
-        btmIndex = 0;
-        cond = new HashMap<>();
-    }
 
 }
 

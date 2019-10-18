@@ -1,7 +1,5 @@
 package jAADD;
 
-import org.apache.commons.math3.optim.linear.LinearConstraint;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -46,12 +44,6 @@ public class AffineForm extends Range {
 
 
     /**
-     * For each noise symbol and each condition in AADD, we save names and documentation.
-     * As the noise symbols are shared this is static.
-     */
-    // protected static AADDMgr AADDMgr = new AADDMgr();
-
-    /**
      * Creates a scalar form equivalent to the floating point number c.
      */
     public AffineForm(double c) {
@@ -70,8 +62,8 @@ public class AffineForm extends Range {
      */
     public AffineForm(double min, double max, int symbol, String ... docs ) {
         super(min, max);
-        if (type == Type.SCALAR) x0 = min;
-        else if (type == Type.FINITE) {
+        if (trap == Trap.SCALAR) x0 = min;
+        else if (trap == Trap.FINITE) {
                 x0 = (max + min) / 2.0;
                 if (symbol == -1) symbol = ++n;
                 xi.put(symbol, Math.max(max - x0, x0 - min));
@@ -83,6 +75,7 @@ public class AffineForm extends Range {
     public AffineForm(Range minmax) {
         super(minmax);
         x0 = (max-min)/2;
+        assert isTrap(): "Constructor only for trap handling.";
     }
 
 
@@ -92,7 +85,7 @@ public class AffineForm extends Range {
      * can be zero but must not be negative.
      */
     public AffineForm(double c, HashMap<Integer, Double> ts, double r) {
-        super(Type.FINITE);
+        super(Trap.FINITE);
         assert r >= 0;
 
         x0     = c;
@@ -105,7 +98,7 @@ public class AffineForm extends Range {
         } else if (Double.compare(r, 0.0) < 0)
             throw new RuntimeException("Trying to create affine form with negative noise: " + r);
 
-        xi = new HashMap<>(ts);
+        xi = new HashMap<Integer, Double>(ts);
         for (Double val : xi.values()) {
             if (Double.isInfinite(val)) {
                 setInfinity();
@@ -119,11 +112,11 @@ public class AffineForm extends Range {
 
         double radius = getRadius();
         if (Double.compare(radius, 0.0) > 0 || Double.compare(r, 0.0) > 0) {
-            type = Type.FINITE;
+            trap = Trap.FINITE;
             min = x0 - r - radius;
             max = x0 + r + radius;
         } else {
-            type = Type.SCALAR;
+            trap = Trap.SCALAR;
             min = max = x0;
         }
     }
@@ -136,7 +129,7 @@ public class AffineForm extends Range {
      */
     public AffineForm(double c, HashMap<Integer, Double> ts, double r, double min, double max) {
         this(c, ts, r);
-        if (type == Type.INFINITE || type == Type.NaN) return;
+        if (trap == Trap.INFINITE || trap == Trap.NaN) return;
 
 
         if (Double.compare(min, this.min) > 0) {
@@ -169,8 +162,8 @@ public class AffineForm extends Range {
      * artificial ranges in hybrid forms.
      */
     public double getRadius() {
-        if (type == Type.NaN) return Double.NaN;
-        if (type == Type.INFINITE) return Double.POSITIVE_INFINITY;
+        if (trap == Trap.NaN) return Double.NaN;
+        if (trap == Trap.INFINITE) return Double.POSITIVE_INFINITY;
 
         double radius = 0.0;
         for (double v : xi.values()) {
@@ -187,7 +180,7 @@ public class AffineForm extends Range {
 
     @Override
     public AffineForm clone() {
-        switch (type) {
+        switch (trap) {
             case SCALAR:
                 return new AffineForm(x0);
             case INFINITE:
@@ -203,9 +196,9 @@ public class AffineForm extends Range {
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;
         AffineForm other = (AffineForm) obj;
-        if (type != other.type) return false;
-        if (type == Type.SCALAR) return x0 == other.x0;
-        else if (type == Type.FINITE)
+        if (trap != other.trap) return false;
+        if (trap == Trap.SCALAR) return x0 == other.x0;
+        else if (trap == Trap.FINITE)
             return (Double.compare(x0, other.x0) == 0 && Double.compare(r, other.r) == 0
                     && xi.equals(other.xi))
                     && ((!overriden && !other.overriden)
@@ -416,7 +409,7 @@ public class AffineForm extends Range {
      */
     public AffineForm mult(AffineForm other) {
         if (isTrap(other)) return new AffineForm(handleTrap(other));
-        if (type == Type.SCALAR && other.type == Type.SCALAR)
+        if (trap == Trap.SCALAR && other.trap == Trap.SCALAR)
             return new AffineForm(x0 * other.x0);
 
         double c = x0 * other.x0;
@@ -512,7 +505,7 @@ public class AffineForm extends Range {
         double delta = (iaMax + iaMin * (1.0 - min - max)) / 2.0;
         double noise = (iaMax + iaMin * (min - max - 1.0)) / 2.0;
 
-        if (noise < 0 || type == Type.SCALAR) {
+        if (noise < 0 || trap == Trap.SCALAR) {
             double nc = Math.max(Math.exp(x0), Double.MIN_VALUE);
             return new AffineForm(nc);
         }
@@ -549,7 +542,7 @@ public class AffineForm extends Range {
         if (isTrap()) return this;
         else if (Double.compare(min, 0) < 0)
             return new AffineForm(Double.NEGATIVE_INFINITY);
-        else if (type == Type.SCALAR)
+        else if (trap == Trap.SCALAR)
             return new AffineForm(Math.log(x0));
 
         double l = Math.log(min);
@@ -570,7 +563,7 @@ public class AffineForm extends Range {
     public AffineForm inv() {
 
         if (isTrap()) return this;
-        else if (type == Type.SCALAR) {
+        else if (trap == Trap.SCALAR) {
             if (Double.compare(x0, 0.0) == 0)
                 return new AffineForm(Double.POSITIVE_INFINITY);
             else
@@ -598,7 +591,7 @@ public class AffineForm extends Range {
      */
     public AffineForm div(AffineForm other) {
         if (isTrap()) return this;
-        else if (other.type == Type.INFINITE) return other;
+        else if (other.trap == Trap.INFINITE) return other;
         return mult(other.inv());
     }
 
@@ -607,7 +600,7 @@ public class AffineForm extends Range {
      */
     public AffineForm sqr() {
         if (isTrap()) return this;
-        else if (type == Type.SCALAR) return new AffineForm(x0 * x0);
+        else if (trap == Trap.SCALAR) return new AffineForm(x0 * x0);
 
         // Affine forms are supposed to be immutable, so we need to create a
         // new one after messing up with aux's internals.
@@ -632,15 +625,15 @@ public class AffineForm extends Range {
     // TODO: Port proper least squares approximation
     public AffineForm sin() {
         if (isTrap()) return this;
-        else if (type == Type.SCALAR) return new AffineForm(Math.sin(x0));
+        else if (trap == Trap.SCALAR) return new AffineForm(Math.sin(x0));
         else return new AffineForm(-1.0, 1.0, -1);
     }
 
     // TODO: Port proper least squares approximation
     public AffineForm cos() {
-        if (type == Type.INFINITE)
+        if (trap == Trap.INFINITE)
             return this;
-        else if (type == Type.SCALAR)
+        else if (trap == Trap.SCALAR)
             return new AffineForm(Math.cos(x0));
         else
             return new AffineForm(-1.0, 1.0, -1);
@@ -655,7 +648,7 @@ public class AffineForm extends Range {
     @Override
     public String toString() {
         String af = super.toString();
-       // if (diagnostics_on ) {
+        if (diagnostics_on ) {
             if (!isTrap()) {
                 af += " = ";
                 af += String.format("%.2f", getCentral()) + " + ";
@@ -664,7 +657,7 @@ public class AffineForm extends Range {
                 }
                 af += "[+/-" +String.format("%.3f",getR()) +"]";
             }
-      //  }
+        }
         return af;
     }
 }

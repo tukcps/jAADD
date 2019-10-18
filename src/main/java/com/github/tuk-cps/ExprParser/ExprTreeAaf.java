@@ -1,7 +1,7 @@
 package ExprParser;
 
 import jAADD.AADD;
-import static jAADD.AADDMgr.REAL;
+import static jAADD.AADD.REAL;
 
 /**
  * Predefined function aaf that generates a new Affine Form with min, max, and the

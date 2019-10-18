@@ -1,14 +1,5 @@
 package jAADD;
 
-import org.apache.commons.math3.linear.ArrayRealVector;
-import org.apache.commons.math3.linear.RealVector;
-import org.apache.commons.math3.optim.linear.LinearConstraint;
-import org.apache.commons.math3.optim.linear.Relationship;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-
 
 /**
  * The class DD implements a decision diagram as base class template leaf types.
@@ -45,18 +36,18 @@ public class DD <ValT>  {
 
     /**
      * Creates an internal node with index i that is already in use and the two child.
-     * @param index of condition. Index must be already assigned a condition.
+     * @param i of condition. Index must be already assigned a condition.
      * @param T DD that will be used for T.
      * @param F DD that will be used for F.
      */
-    protected DD(int index,  DD<ValT> T, DD<ValT> F) {
+    protected DD(int i,  DD<ValT> T, DD<ValT> F) {
         assert T != null;
         assert F != null;
-        assert AADDMgr.getCond(index) != null;
-        assert index < T.index : "  DD insane: index "+index+" but T "+T.index;
-        assert index < F.index : "  DD insane: index "+index+" but F "+F.index;
+        assert (i == 1) || (Conditions.getX(i) != null) || (Conditions.getXBool(i) != null);
+        assert i < T.index : "  DD insane: index "+i+" but T "+T.index;
+        assert i < F.index : "  DD insane: index "+i+" but F "+F.index;
 
-        this.index = index;
+        this.index = i;
         this.T = T;
         this.F = F;
         leafValue = null;
@@ -64,7 +55,7 @@ public class DD <ValT>  {
 
 
     /**
-     *  Returns true if the node is a leaf.
+     * Returns true if the node is a leaf.
      */
     public boolean isLeaf() { return index == Integer.MAX_VALUE; }
     public boolean isInternal() { return index != Integer.MAX_VALUE; }
@@ -92,8 +83,16 @@ public class DD <ValT>  {
      * Gets the condition to which the index refers.
      * @return Affine form that models a linear constraint {@code cond > 0}.
      */
-    public AffineForm Cond() {
-        return AADDMgr.getCond(index);
+    public AffineForm Cond()   {
+        return Conditions.getX(index);
+    }
+
+    /**
+     * Returns true is the condition is a simple boolean variable.
+     * @return
+     */
+    public Boolean BoolCond() {
+        return Conditions.getX(index) == null;
     }
 
 
@@ -108,25 +107,6 @@ public class DD <ValT>  {
         }
         return str;
     }
-
-
-    /**
-     * Translates an Affine Form into a linear constraint of the form
-     *     {@code a1 e1 +- ... an en >= 0}
-     *
-     * @param af Affine form from a conditional operation.
-     * @return A Linear constraint in apache common math format.
-     */
-    /*
-    public LinearConstraint AF2LinearConstraint(AffineForm af) {
-        // Translate newCond to Apache common math linear constraint:
-        Set<Integer> symbols = new HashSet<Integer>(af.xi.keySet());
-        RealVector coef = new ArrayRealVector();
-        for (Integer sym : symbols) {
-            coef.append(af.xi.containsKey(sym) ? af.xi.get(sym) : 0.0);
-        }
-        return new LinearConstraint(coef, Relationship.GEQ ,-af.getCentral());
-    }*/
 
 
     /**

@@ -6,8 +6,8 @@ import java.util.function.Function;
 import org.apache.commons.math3.optim.linear.*;
 import org.apache.commons.math3.optim.PointValuePair;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
-import static jAADD.AADDMgr.ONE;
-import static jAADD.AADDMgr.ZERO;
+import static jAADD.BDD.ONE;
+import static jAADD.BDD.ZERO;
 
 
 
@@ -23,6 +23,7 @@ import static jAADD.AADDMgr.ZERO;
  */
 public class AADD extends DD<AffineForm> implements Cloneable {
 
+    public static final AADD REAL = new AADD(AffineForm.INFINITE);
     public static double LPCallTh = 0.001; // If the radius is below this value, the LP Solver will not be called to compute a smaller range.
     public static double joinTh   = 0.001;
 
@@ -64,14 +65,14 @@ public class AADD extends DD<AffineForm> implements Cloneable {
      public AADD(int index, AADD T, AADD F) {
          super(index, T, F);
 
-         if (T.isLeaf() && T.Value().type == Range.Type.NaN) {
+         if (T.isLeaf() && T.Value().trap == Range.Trap.NaN) {
             this.leafValue=F.leafValue.clone();
             this.T = F.T();
             this.F = F.F();
             this.index = F.index;
          }
 
-         if (F.isLeaf() && F.Value().type == Range.Type.NaN) {
+         if (F.isLeaf() && F.Value().trap == Range.Trap.NaN) {
             this.leafValue=T.leafValue.clone();
             this.T = T.T();
             this.F = T.F();
@@ -360,8 +361,8 @@ public class AADD extends DD<AffineForm> implements Cloneable {
         computeBounds(indexes, signs, 0, bounds);
         assert bounds.size() != 0;
 
-        Range res = new Range(Range.Type.NaN);
-        res.type = Range.Type.FINITE;
+        Range res = new Range(Range.Trap.NaN);
+        res.trap = Range.Trap.FINITE;
         for (Range b: bounds) {
             if (! b.isTrap()) {
                 res.min = Math.min(res.min, b.min);
@@ -381,18 +382,24 @@ public class AADD extends DD<AffineForm> implements Cloneable {
     private void computeBounds(int[] indexes, String[] operators, int len, Set<Range> bounds) {
 
         if (isLeaf()) {
-            if (Value().getType() != Range.Type.FINITE || indexes.length == 0 || Value().getRadius() < LPCallTh)
+            if (Value().getTrap() != Range.Trap.FINITE || indexes.length == 0 || Value().getRadius() < LPCallTh)
                 bounds.add( new Range(Value().getMin(), Value().getMax() ) );
             else
                 bounds.add( callLPSolver(indexes, operators, len) );
         }
         else {  /* Recursion: collect conditions from root to leaf node */
-            indexes[len]=index;
-            operators[len]=">=";
-            len++;
-            T().computeBounds(indexes, operators, len, bounds);
-            operators[len-1]="<";
-            F().computeBounds(indexes, operators, len, bounds);
+            if (!BoolCond()) {
+                indexes[len] = index;
+                operators[len] = ">=";
+                len++;
+                T().computeBounds(indexes, operators, len, bounds);
+                operators[len - 1] = "<";
+                F().computeBounds(indexes, operators, len, bounds);
+            }
+            else {
+                T().computeBounds(indexes, operators, len, bounds);
+                F().computeBounds(indexes, operators, len, bounds);
+            }
         }
     }
 
@@ -420,7 +427,8 @@ public class AADD extends DD<AffineForm> implements Cloneable {
         Set<Integer> symbols = new TreeSet<Integer>(Value().xi.keySet());
 
         for (int i=0; i<len; i++) {
-            symbols.addAll(AADDMgr.getCond(indexes[i]).xi.keySet());
+           //  System.out.println(i + " = " + indexes[i]);
+            symbols.addAll(Conditions.getX(indexes[i]).xi.keySet());
         }
 
         // stores partial deviations xi*ei in affine forms of conditions and value of leaf node
@@ -438,7 +446,7 @@ public class AADD extends DD<AffineForm> implements Cloneable {
 
         // constraints from conditions of the internal nodes, incl. r.
         for (int i=0; i < len; i++) {
-            AffineForm condition = AADDMgr.getCond(indexes[i]);
+            AffineForm condition = Conditions.getX(indexes[i]);
 
             int k=0;
             for (Integer symb : symbols) {
@@ -470,9 +478,9 @@ public class AADD extends DD<AffineForm> implements Cloneable {
         // for(int i=0; i<len; i++) System.out.print(""+indexes[i]+", ");System.out.println("");
 
         //Print the unequationSystem for the LPsolver in the file "unequationSystemOnDemand"
-        if (AADDMgr.debugFlagLPsolvePrint) AADDMgr.printUnequationSystem("unequationSystemOnDemand",constraints,partial_terms,Value());
+        if (AADDMgr.debugFlagLPsolvePrint) AADDMgr.printInequationSystem("unequationSystemOnDemand",constraints,partial_terms,Value());
 
-        Range result = new Range(Range.Type.FINITE);
+        Range result = new Range(Range.Trap.FINITE);
         PointValuePair solution;
         SimplexSolver solver = new SimplexSolver(1.0e-3, 100, 1.0e-30);
         try {
@@ -506,24 +514,23 @@ public class AADD extends DD<AffineForm> implements Cloneable {
         catch (UnboundedSolutionException e) {
             //writting the unequation system the UnboundedSolution Instances in a textfile
             //
-            AADDMgr.printUnequationSystem("unequationSystemOfUnboundedError",constraints,partial_terms,Value());
+            AADDMgr.printInequationSystem("unequationSystemOfUnboundedError",constraints,partial_terms,Value());
 
             Value().diagnostics_on = true;
-            System.out.println("");
+            System.out.println();
             System.out.println("ERROR: Unbounded solution of LP problem. ");
             System.out.println("       Iterations: "+solver.getIterations());
             System.out.println("       Parameters of LP problem:");
             System.out.print  ("       Condition's indexes: " + len + ", indices: " );
             for(int i=0; i<len; i++) { System.out.print(""+indexes[i]+", ");  }
-            System.out.println("");
-            System.out.println("");
+            System.out.println();
+            System.out.println();
             System.out.println("Details:");
-            for(int i=0; i<len; i++) System.out.println("       Condition "+indexes[i]+": "+AADDMgr.getCond(indexes[i])+" "+ operators[i]+" 0");
+            for(int i=0; i<len; i++) System.out.println("       Condition "+indexes[i]+": "+Conditions.getX(indexes[i])+" "+ operators[i]+" 0");
             System.out.println("       Value:         "+Value());
-            System.out.println("");
+            System.out.println();
             sanityCheck();
             throw new RuntimeException(("AADD-Error: unbounded solution."));
-
         }
         return result;
     }
@@ -540,7 +547,7 @@ public class AADD extends DD<AffineForm> implements Cloneable {
             double min, max;
 
             /* no need to call solver if there are no partial deviations or no conditions. */
-            if (Value().getType() == jAADD.Range.Type.SCALAR || indexes.length == 0) {
+            if (Value().getTrap() == Range.Trap.SCALAR || indexes.length == 0) {
                 min=Value().getMin();
                 max=Value().getMax();
             } else {
@@ -582,21 +589,29 @@ public class AADD extends DD<AffineForm> implements Cloneable {
             }
 
             if (op==">=" || op==">")
-                return new BDD(AADDMgr.newTopIndex(Value()), ONE, ZERO);
+                return new BDD(Conditions.newIndex(Value()), ONE, ZERO);
             else
-                return new BDD(AADDMgr.newTopIndex(Value()), ZERO, ONE);
+                return new BDD(Conditions.newIndex(Value()), ZERO, ONE);
         }
 
         assert isInternal();
 
-        /* Recursion step.*/
-        indexes[len]=index;
-        operators[len]=">=";
-        len++;
+        BDD Tr;
+        BDD Fr;
 
-        BDD Tr = T().CheckObjective(indexes, operators, len, op);
-        operators[len-1]="<";
-        BDD Fr = F().CheckObjective(indexes, operators, len, op);
+        /* Recursion step.*/
+        if (!BoolCond()) {
+            indexes[len] = index;
+            operators[len] = ">=";
+            len++;
+
+            Tr = T().CheckObjective(indexes, operators, len, op);
+            operators[len - 1] = "<";
+            Fr = F().CheckObjective(indexes, operators, len, op);
+        } else {
+            Tr = T().CheckObjective(indexes, operators, len, op);
+            Fr = F().CheckObjective(indexes, operators, len, op);
+        }
 
         // before building and returning the new node,
         // we check for redundancies that we can reduce before

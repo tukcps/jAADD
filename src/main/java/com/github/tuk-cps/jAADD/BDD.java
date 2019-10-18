@@ -2,8 +2,6 @@ package jAADD;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import static jAADD.AADDMgr.ONE;
-import static jAADD.AADDMgr.ZERO;
 
 
 /**
@@ -13,6 +11,15 @@ import static jAADD.AADDMgr.ZERO;
  *  @author Christoph Grimm, Carna Zivkovic
  */
 public class BDD extends DD<Boolean> implements Cloneable {
+
+    /**
+     * ONE and ZERO are the only leaf nodes that may be used.
+     * BOOL models an unknown value that is ONE or ZERO and remains unknown.
+     */
+    public static BDD ONE  = new BDD(true);      // Leave of value ONE
+    public static BDD ZERO = new BDD(false);     // Leave of value ZERO
+    public static BDD BOOL = new BDD(1, ONE, ZERO);
+
 
     /**
      * Creates a new leaf node.
@@ -34,8 +41,6 @@ public class BDD extends DD<Boolean> implements Cloneable {
         else return ZERO;
     }
 
-    public static BDD ONE() { return AADDMgr.ONE; }
-    public static BDD ZERO() { return AADDMgr.ZERO; }
 
     /**
      * Creates an internal node with a given index.
@@ -48,17 +53,6 @@ public class BDD extends DD<Boolean> implements Cloneable {
     public BDD(int index, BDD T, BDD F) {
         super(index, T, F);
     }
-
-
-    /**
-     * Creates an internal node and a new condition.
-     * @param cond an affine form that models the condition.
-     * @param T sub-BDD for true; no copy is made.
-     * @param F sub-BDD for false; no copy is made.
-     */
-    // public BDD(AffineForm cond, BDD T, BDD F) {
-    //     super(cond, T, F);
-    // }
 
 
     /**
@@ -97,8 +91,6 @@ public class BDD extends DD<Boolean> implements Cloneable {
         // Otherwise we recurse to T and E nodes.
         return new BDD(index, T().Apply(op), F().Apply(op));
 
-        // Check for reduction not possible as complement is only operation and does not
-        // introduce redundancies.
     }
 
 

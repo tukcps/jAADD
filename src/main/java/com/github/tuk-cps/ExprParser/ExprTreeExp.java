@@ -1,6 +1,6 @@
 package ExprParser;
 
-import static jAADD.AADDMgr.REAL;
+import static jAADD.AADD.REAL;
 
 /**
  * Predefined functions: exp

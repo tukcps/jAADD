@@ -1,7 +1,7 @@
 package ExprParser;
 
 import jAADD.AADD;
-import static jAADD.AADDMgr.REAL;
+import static jAADD.AADD.REAL;
 
 /**
  * Predefined functions: range, uses AADD with new noise symbol.
