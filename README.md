@@ -7,6 +7,7 @@ conditions and Affine Forms that model computations on reals.
 Both interact via predicates.
 
 The environment for development is: 
+- Java 11 or newer
 - Gradle as build tool.  
 - Junit 5 for unit testing.
 - Apache common math library for solving LP problems.
