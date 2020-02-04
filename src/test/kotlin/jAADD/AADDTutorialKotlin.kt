@@ -84,7 +84,7 @@ class AADDTutorialKotlin {
             println("  At t=$i, the is-value is: $isval")
             str.add(isval, i.toDouble())
         }
-        str.display()
+        // str.display()
         assertEquals(1.0, isval.value!!.x0, 0.01)
     }
 
