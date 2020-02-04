@@ -1,7 +1,10 @@
 # jAADD 
 This repository contains the jAADD library. 
 It implements *Affine Arithmetic Decision Diagrams* (AADD) in Java. 
-AADD permit in particular the symbolic execution of Java codes.
+AADD permit the symbolic execution of Java or Kotlin programs, 
+in particularof signal processing software.
+Other languages for the JVM platform might work as well. 
+
 AADD are a combination of reduced, ordered BDD that model discrete
 conditions and Affine Forms that model computations on reals. 
 Both interact via predicates.
