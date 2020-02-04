@@ -1,0 +1,18 @@
+This is v2.0 of jAADD.
+
+v2.0:
+- Multi-threaded LP solving,
+- Constructs for modeling control flow: ifS, elseS, endS, assignS,
+- Streamlined API for Factories,
+- Overloaded Operators for Kotlin
+- Adapted API to naming conventions of Java.
+- Written in Kotlin, but mostly same API as v1.3 from Java.
+
+
+v1.3:
+Last Java-written release.
+API is made compatible with v2.0.
+There should be no need to use it, unless one really insists on Java source code.
+
+v1.0:
+Initial version, published via maven repository.
