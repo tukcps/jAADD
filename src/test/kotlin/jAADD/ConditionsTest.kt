@@ -34,8 +34,8 @@ class ConditionsTest {
 
    @Test
     fun readCondTest() {
+        /** This test can fail if the unit tests are run the first time */ 
         println("=== Testing: Reading conditions from Json file ===")
-
         Conditions.init()
         Conditions.fromJson("out/Conditions.json")
         Assertions.assertEquals(3, Conditions.X.size )

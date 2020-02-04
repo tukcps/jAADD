@@ -5,6 +5,9 @@ import jAADD.NiceApi.endS
 import jAADD.NiceApi.ifS
 import org.junit.jupiter.api.Assertions
 
+/**
+ * Some examples from a recent tutorial on AADD.
+ */
 class AADDTutorial {
     fun instantiation() {
         val scalar   = AADD.scalar(1.0)
@@ -66,7 +69,6 @@ class AADDTutorial {
                     "setval: ${setval.getRange()}, pi: ${piout.getRange()}")
             t.add(isval, i.toDouble())
         }
-        display(displayTree("isval", isval))
         t.display()
     }
 
@@ -106,7 +108,7 @@ class AADDTutorial {
         val b = AADD.range(2.0 .. 4.0, 2)
         val c = (a * b) gt (a + b)
         println("c=$c")
-        display(displayTree("c", c))
+        c.display("c")
     }
 
     fun jsonExample() {
@@ -121,8 +123,7 @@ class AADDTutorial {
         var x = a*b
         var y = a-b
         println("a*b=$x and a-b=$y")
-        display(displayTree("AADD x", x), displayTree("AADD y", y))
-
+        display(displayTree(x, "AADD x"), displayTree(y,"AADD y"))
     }
 
     fun cavExampleControlFlow() {
@@ -133,7 +134,7 @@ class AADDTutorial {
         x = x.assignS(x- AADD.scalar(1.5))
         endS()
         println("x=$x")
-        display(displayTree("AADD x", x))
+        display(displayTree(x, "AADD x"))
     }
 }
 
