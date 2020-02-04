@@ -1,8 +1,12 @@
-package jAADD;
+package jAADD.examples;
 
 import exprParser.ExprError;
 import exprParser.ExprParser;
 import exprParser.ParseError;
+import jAADD.AADD;
+import jAADD.AADDStream;
+import jAADD.AffineForm;
+import jAADD.BDD;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
