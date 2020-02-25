@@ -1,28 +1,30 @@
 /*
  * Gradle build file for jAADD.
- * It uses a pre-compiled version of z3 under z3lib, not the maven that is outdated. 
- * 
- * - gradle build builds it. 
- * - gradle clean cleans up. 
- * - The (fat) jar file is in ./build/libs. 
- * 
+ * It uses a pre-compiled version of z3 under z3lib, not the maven that is outdated.
+ *
+ * - gradle build builds it.
+ * - gradle clean cleans up.
+ * - The (fat) jar file is in ./build/libs.
+ *
  * User Manual available at https://docs.gradle.org/5.5/userguide/java_library_plugin.html
  */
 
-// building
 plugins {
     id 'java-library' // support for libraries: jaadd.jar
     id 'idea'
-
-
-
+    id 'org.jetbrains.kotlin.jvm' version '1.3.61'
+    id 'org.jetbrains.dokka' version '0.10.0'
 }
 
-apply plugin: 'java'
 
 repositories {
     jcenter()
     mavenCentral()
+}
+
+dokka {
+    outputFormat = 'html' 
+    outputDirectory = "$buildDir/dokka"
 }
 
 
@@ -33,12 +35,15 @@ dependencies {
     // compile fileTree(include: ['*.jar'], dir: 'libs')
     compile group: 'org.json', name: 'json', version: '20180813'
     compile 'com.google.code.gson:gson:2.2.4'
+    compile group: 'org.knowm.xchart', name: 'xchart', version: '3.6.1'
 
 
     test.useJUnitPlatform()
     testImplementation "org.junit.jupiter:junit-jupiter-params:5.5.1"
     testImplementation "org.junit.jupiter:junit-jupiter-api:5.5.1"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.5.1"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.3"
 }
 
 test {
@@ -49,116 +54,28 @@ test {
 
 //create a single Jar with all dependencies
 task fatJar(type: Jar) {
-	manifest { attributes 'Implementation-Title': 'jAADD library',  'Implementation-Version': '1.0.0'}
+	manifest { attributes 'Implementation-Title': 'jAADD library',  'Implementation-Version': '2.0'} 
 	baseName = project.name + '-all'
     	from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     	with jar
 }
 
-// deploying
 
-apply plugin: 'signing'
+dokka {
+    outputFormat = 'html'
+    outputDirectory = "$buildDir/javadoc"
+    
+    // In case of a Gradle multiproject build, you can include subprojects here to get merged documentation
+    // Note however, that you have to have the Kotlin plugin available in the root project and in the subprojects
+    subProjects = ["subproject1", "subproject2"]
+        
+    // Used for disabling auto extraction of sources and platforms in both multi-platform and single-platform modes
+    // When set to true, subProject and kotlinTasks are also omitted
+    disableAutoconfiguration = false 
 
-signing {
-    sign configurations.archives
-
-}
-
-// Deploying
-
-apply plugin: 'maven'
-
-// Add Javadoc JAR and AADD sources JAR to artifact
-task javadocJar(type: Jar){
-    classifier = 'javadoc'
-    from javadoc
-}
-
-task sourcesJar(type: Jar) {
-    classifier= 'sources'
-    from sourceSets.main.allSource
-}
-
-artifacts {
-    archives javadocJar, sourcesJar
-}
-
-// Configure group ID, artifact ID and version
-
-group = "com.github.tuk-cps"
-archivesBaseName="aadd"
-version = "1.0.0"
-
-// and now Build, sign and upload to OSSRH
-
-uploadArchives {
-    repositories {
-
-        mavenDeployer {
-
-            // sign POM 
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-
-            // Destination
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
-            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
-
-            // Add required metadata to POM
-
-            pom.project {
-
-                name 'Affine Arithmetic Decision Diagrams (AADD)'
-                packaging 'jar'
-                description 'This project implements Affine Arithmetic Decision Diagrams (AADD) in Java. AADD permit in particular the symbolic execution of Java codes.'
-                url 'https://github.com/TUK-CPS/jAADD'
-
-                scm {
-
-                    connection 'scm:git:git://github.com/TUK-CPS/jAADD.git'
-                    developerConnection 'scm:git:ssh://github.com/TUK-CPS/jAADD.git'
-                    url 'https://github.com/TUK-CPS/jAADD/tree/master'
-
-                }
-
-               licenses {
-                    license {
-                        name 'The MIT License'
-                        url 'https://opensource.org/licenses/MIT'
-                    }
-                }
-
-                developers {
-
-                    developer {
-
-                        id 'grimm'
-                        name 'Christoph Grimm'
-                        email 'grimm@cs.uni-kl.de'
-                        organization 'TU Kaiserslautern, Design of CPS systems'
-                        organizationUrl 'https://cps.cs.uni-kl.de/cps/'
-
-                    }
-                    developer {
-
-                        id 'zivkovic'
-                        name 'Carna Zivkovic'
-                        email 'zivkovic@cs.uni-kl.de'
-                        organization 'TU Kaiserslautern, Design of CPS systems'
-                        organizationUrl 'https://cps.cs.uni-kl.de/cps/'
-
-                    }
-                }
-
-            }
-
-
-        }
-
-    }
-
+    // Use default or set to custom path to cache directory
+    // to enable package-list caching
+    // When this is set to default, caches are stored in $USER_HOME/.cache/dokka
+    cacheRoot = 'default' 
+    
 }
