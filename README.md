@@ -47,6 +47,9 @@ or, in Kotlin:
 var d = f and X or t;
 var e = t and BDD.variable("X");
 ```
+Note that jAADD's BDD implementation is just intended to complement jAADD. 
+If you need only BDD, there are much better BDD packages available, 
+e.g. JavaBDD (http://javabdd.sourceforge.net). 
 
 ### AADD and its use
 
