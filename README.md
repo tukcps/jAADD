@@ -3,11 +3,11 @@ This repository contains the jAADD library in version 2.0.
 It implements *Affine Arithmetic Decision Diagrams* (AADD) for Java and Kotlin.
 AADD are a combination of reduced, ordered BDD that model discrete
 conditions and Affine Forms that model computations on reals.
-Both interact via predicates.
+Both interact via conditions resp. the ITE function.
 
 
 The environment for development is:
-- Kotlin v1.3+
+- Kotlin v1.3+ with coroutines.
 - Gradle as build tool.  
 - Junit 5 for unit testing.
 - Apache common math library for solving LP problems.
@@ -33,7 +33,7 @@ The following example shows how to create BDD objects in Java or Kotlin:
 ```
 var f = BDD.False            // leaf with value false
 var t = BDD.True             // leaf with value true
-var a = BDD.constant(true);  // leaf with Boolean value true or false
+var a = BDD.constant(true);  // leaf with Boolean value defined by parameter
 var X = BDD.variable("X")    // internal node depending on decision variable "X"
 ```
 To compute with BDD, one can use Boolean operations, i.e. an, or, not, as defined
