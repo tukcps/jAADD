@@ -1,3 +1,27 @@
+# jAADD v3.0
+
+
+V3 of jAADD will be published soon.
+Here.
+V3 separates textual expressions from the pure computational library and will offer the following features; 
+hence, V3 will be more compact. 
+
+- Re-worked API of base classes to completely get rid of nullable fields. 
+    + A node is EITHER a leaf (with no childs) OR an internal with true and false childs. 
+    + Code is statically checked by Kotlin using sealed class + case statements.
+- Support for reals (AADD), integers (IDD), strings (StrDD), booleans (BDD).
+- Smart garbage collection for noise symbols. 
+- Merging of AADD/IDD improved. 
+- Combined use of interval arithmetics and affine arithmetics.
+- Consideration of FP roundoff errors. 
+    
+- The expression language will be in a separate repository SysMD that adds support for
+    + creating feature models and constraint networks in SysMLv2 inspired language, based on subset of its meta-model.
+    + bi-directional computations. 
+    + support for real-valued quantities with SI and national units.
+    + SysMD will as well be published under /tukcps, but in separate repository. 
+
+
 # jAADD v2.0
 This repository contains the jAADD library in version 2.0.
 It implements *Affine Arithmetic Decision Diagrams* (AADD) for Java and Kotlin.
