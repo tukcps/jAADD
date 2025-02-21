@@ -1,10 +1,13 @@
+> Consider migrating to the Multiplatform Version of the AADD library. It has much more features e.g. consideratin of FP traps, roundoff errors, multi-threaded solving, etc.
+> It can be found in the following repository https://github.com/tukcps/Multiplatform-AADD (v4.0+).
+>
+> Main novelties: Multiplatform (also shared libraries for, e.g., C++); Artifacts are in Maven repository; integration of other solvers, and more. 
+
+
 # jAADD v3.0
 
-
-V3 of jAADD will be published soon.
-Here.
 V3 separates textual expressions from the pure computational library and will offer the following features; 
-hence, V3 will be more compact. 
+hence, V3 is more compact. 
 
 - Re-worked API of base classes to completely get rid of nullable fields. 
     + A node is EITHER a leaf (with no childs) OR an internal with true and false childs. 
